@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>LifeLink</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 25%, #fff0f0 50%, #ffebeb 75%, #fff8f8 100%);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle at 20% 50%, rgba(214, 48, 49, 0.05) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(214, 48, 49, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 8px 30px rgba(214, 48, 49, 0.15), 0px 0px 40px rgba(214, 48, 49, 0.08);
+            border: 2px solid rgba(214, 48, 49, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+        h2 {
+            text-align: center;
+            color: #d63031;
+            font-size: 20px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 2px solid rgba(214, 48, 49, 0.2);
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            background-color: #fff9f9;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #d63031;
+            background-color: white;
+            box-shadow: 0px 0px 10px rgba(214, 48, 49, 0.2);
+        }
+        
+        button {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #d63031 0%, #c41e3a 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0px 4px 15px rgba(214, 48, 49, 0.3);
+        }
+        
+        button:hover {
+            background: linear-gradient(135deg, #b71c1c 0%, #a01818 100%);
+            box-shadow: 0px 6px 20px rgba(214, 48, 49, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        #result {
+            background: linear-gradient(135deg, rgba(214, 48, 49, 0.05) 0%, rgba(214, 48, 49, 0.02) 100%);
+            padding: 15px;
+            border-radius: 8px;
+            white-space: pre-line;
+            border-left: 4px solid #d63031;
+            margin-top: 15px;
+        }
+        
+        #result a {
+            color: #d63031;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        #result a:hover {
+            text-decoration: underline;
+            color: #b71c1c;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(135deg, #d63031 0%, #c41e3a 100%);
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            box-shadow: 0px 4px 20px rgba(214, 48, 49, 0.3);
+            border-bottom: 4px solid #a01818;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        🩸 LifeLink – Emergency Blood Network
+    </div>
+
+    <div class="container">
+
+        <div class="section">
+            <h2>Register as Donor</h2>
+            <input id="name" placeholder="Full Name">
+            <input id="blood" placeholder="Blood Group (e.g., O+)">
+            <input id="phone" placeholder="Phone Number">
+            <input id="location" placeholder="City">
+            <button onclick="register()">Register</button>
+        </div>
+
+        <div class="section">
+            <h2>Emergency Search</h2>
+            <input id="searchBlood" placeholder="Required Blood Group">
+
+            <button onclick="search()">Search Donors</button>
+            <div id="result"></div>
+        </div>
+
+    </div>
+
+    <script>
+        const API_URL = "https://civbr0s534.execute-api.us-east-1.amazonaws.com";
+
+        function register() {
+            fetch(API_URL + "/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        name: document.getElementById("name").value,
+                        blood_group: document.getElementById("blood").value,
+                        phone: document.getElementById("phone").value,
+                        location: document.getElementById("location").value
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    alert("Donor Registered Successfully!");
+                });
+        }
+
+        function search() {
+
+            document.getElementById("result").innerText = "Searching...";
+
+            fetch(API_URL + "/emergency", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        blood_group: document.getElementById("searchBlood").value,
+                    })
+
+                })
+                .then(res => res.json())
+                .then(data => {
+
+                    if (data.message) {
+                        document.getElementById("result").innerText = data.message;
+                    } else if (data.matching_donors && data.matching_donors.length > 0) {
+
+                        let output = "Total Donors Found: " + data.matching_donors.length + "\n\n";
+
+                        data.matching_donors.forEach(donor => {
+                            output += "Name: " + donor.name + "\n";
+                            output += "Blood Group: " + donor.blood_group + "\n";
+                            output += "Location: " + donor.location + "\n";
+                            if (donor.phone) {
+                                output += "<a href='https://wa.me/91" + donor.phone + "' target='_blank'>Contact on WhatsApp</a>\n";
+                            } else {
+                                output += "Phone: Not Available\n";
+                            }
+
+                            output += "---------------------------\n";
+                        });
+
+                        document.getElementById("result").innerHTML = output;
+
+                    } else {
+                        document.getElementById("result").innerText = "No donors found.";
+                    }
+                });
+        }
+    </script>
+
+</body>
+
+</html>
